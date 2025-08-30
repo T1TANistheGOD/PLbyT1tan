@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const options = {
             method: 'GET',
             headers: {
-                'x-rapidapi-key': '9a93c5428amshb127fac77f6dd2cp1c84f6jsnca7748c58c60',
+                'x-rapidapi-key': 'your-rapidAPI key',
                 'x-rapidapi-host': 'livescore6.p.rapidapi.com'
             }
         };
@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const options = {
             method: 'GET',
             headers: {
-                'x-rapidapi-key': '9a93c5428amshb127fac77f6dd2cp1c84f6jsnca7748c58c60',
+                'x-rapidapi-key': 'your-rapidAPI key',
                 'x-rapidapi-host': 'livescore6.p.rapidapi.com'
             }
         };
@@ -314,4 +314,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchMatches();
     fetchTable();
+
 });
