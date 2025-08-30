@@ -11,14 +11,41 @@
 <body>
     <nav class="navbar">
         <div class="nav-logo">
-            <img src="images/premier-league-logo.png" alt="Premier League Logo" class="logo">
-            <span class="navtitle">Premier League</span>
+            <img src="images\premier-league-logo.png" alt="Premier League Logo" class="logo">
         </div>
-        <ul class="nav-items">
-            <li><a href="#fixtures" class="nav-link active" onclick="showSection('fixtures')">Fixtures</a></li>
-            <li><a href="#results" class="nav-link" onclick="showSection('results')">Results</a></li>
-            <li><a href="#table" class="nav-link" onclick="showSection('table')">Table</a></li>
-        </ul>
+        <div class="nav-obj">
+            <ul class="teams">
+                <li><a href="https://www.arsenal.com"><img class="team-img" src="images/arsenal.png" alt="Arsenal"></a></li>
+                <li><a href="https://www.avfc.co.uk"><img class="team-img" src="images/astonvilla.png" alt="Aston Villa"></a></li>
+                <li><a href="https://www.afcb.co.uk"><img class="team-img" src="images/bournemouth.png" alt="AFC Bournemouth"></a></li>
+                <li><a href="https://www.brentfordfc.com"><img class="team-img" src="images/brentford.png" alt="Brentford"></a></li>
+                <li><a href="https://www.brightonandhovealbion.com"><img class="team-img" src="images/brighton.png" alt="Brighton"></a></li>
+                <li><a href="https://www.burnleyfootballclub.com"><img class="team-img" src="images/burnley.png" alt="Burnley"></a></li>
+                <li><a href="https://www.chelseafc.com"><img class="team-img" src="images/chelsea.png" alt="Chelsea"></a></li>
+                <li><a href="https://www.cpfc.co.uk"><img class="team-img" src="images/crystalpalace.png" alt="Crystal Palace"></a></li>
+                <li><a href="https://www.evertonfc.com"><img class="team-img" src="images/everton.png" alt="Everton"></a></li>
+                <li><a href="https://www.nottinghamforest.co.uk"><img class="team-img" src="images/forest.png" alt="Nottingham Forest"></a></li>
+                <li><a href="https://www.fulhamfc.com"><img class="team-img" src="images/fulham.png" alt="Fulham"></a></li>
+                <li><a href="https://www.leedsunited.com"><img class="team-img" src="images/leedsunited.png" alt="Leeds United"></a></li>
+                <li><a href="https://www.lcfc.com"><img class="team-img" src="images/leicester.png" alt="Leicester City"></a></li>
+                <li><a href="https://www.liverpoolfc.com"><img class="team-img" src="images/liverpool.png" alt="Liverpool"></a></li>
+                <li><a href="https://www.mancity.com"><img class="team-img" src="images/mancity.png" alt="Manchester City"></a></li>
+                <li><a href="https://www.manutd.com"><img class="team-img" src="images/manutd.png" alt="Manchester United"></a></li>
+                <li><a href="https://www.nufc.co.uk"><img class="team-img" src="images/newcastle.png" alt="Newcastle United"></a></li>
+                <li><a href="https://www.tottenhamhotspur.com"><img class="team-img" src="images/spurs.png" alt="Tottenham Hotspur"></a></li>
+                <li><a href="https://www.southamptonfc.com"><img class="team-img" src="images/southampton.png" alt="Southampton"></a></li>
+                <li><a href="https://www.sunderlandafc.com"><img class="team-img" src="images/sunderland.png" alt="Sunderland"></a></li>
+                <li><a href="https://www.whufc.com"><img class="team-img" src="images/westham.png" alt="West Ham United"></a></li>
+                <li><a href="https://www.wolves.co.uk"><img class="team-img" src="images/wolves.png" alt="Wolves"></a></li>
+            </ul>
+            <ul class="nav-items">
+                <li class="plc"><a href="https://www.premierleague.com/en" ><img src="images/pl-logo.png" alt="" class="pl"></a></li>
+                <li><a href="#fixtures" class="nav-link active" onclick="showSection('fixtures')">Matches</a></li>
+                <li><a href="#results" class="nav-link" onclick="showSection('results')">Results</a></li>
+                <li><a href="#table" class="nav-link" onclick="showSection('table')">Table</a></li>
+                <li><a href="https://www.premierleague.com/en/stats" class="nav-link">Statistics</a></li>
+            </ul>
+        </div>
     </nav>
     <main>
         <section id="fixtures" class="section active">
@@ -38,10 +65,29 @@
         </section>
     </main>
     <footer>
-        <p>© Premier League 2025</p>
+    <div class="footnav">
+        <ul class="f1">
+            <a href="https://www.premierleague.com/en"><li>Premier League</li></a>
+            <a href="#fixtures"><li>Matches</li></a>
+            <a href="https://soccer-100.com/league/eng-1"><li>Live</li></a>
+        </ul>
+        <ul class="f2">
+            <a href="#table"><li>Table</li></a>
+            <a href="https://www.premierleague.com/en/stats"><li>Statistics</li></a>
+            <a href="#results"><li>Results</li></a>
+        </ul>
+        <ul class="f3">
+            <a href="https://www.premierleague.com/en/clubs"><li>Clubs</li></a>
+            <a href="https://www.premierleague.com/en/players"><li>Players</li></a>
+            <a href="https://www.premierleague.com/en/injuries"><li>Injuries</li></a>
+        </ul>
+    </div>
+    <div class="foot">
+        <p>© PREMIER LEAGUE 2025</p>
         <div class="foot-logo">
-            <img src="images/premier-league-logo.png" alt="Premier League Logo" class="logo">
+            <img src="images/pl-logo.png" alt="Premier League Logo" class="logo">
         </div>
+    </div>
     </footer>
     <script src="script.js"></script>
 </body>

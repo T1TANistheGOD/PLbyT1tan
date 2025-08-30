@@ -1,34 +1,31 @@
-// Team logo mapping
 const images = {
-        "Arsenal": "images/arsenal.png",
-        "Aston Villa": "images/astonvilla.png",
-        "Bournemouth": "images/bournemouth.png",
-        "Brentford": "images/brentford.png",
-        "Brighton": "images/brighton.png",
-        "Chelsea": "images/chelsea.png",
-        "Crystal Palace": "images/crystalpalace.png",
-        "Everton": "images/everton.png",
-        "Fulham": "images/fulham.png",
-        "Ipswich Town": "images/ipswichtown.png",
-        "Leicester City": "images/leicester.png",
-        "Liverpool": "images/liverpool.png",
-        "Manchester City": "images/mancity.png",
-        "Manchester United": "images/manutd.png",
-        "Newcastle United": "images/newcastle.png",
-        "Nottingham Forest": "images/forest.png",
-        "Southampton": "images/southampton.png",
-        "Tottenham Hotspur": "images/spurs.png",
-        "West Ham United": "images/westham.png",
-        "Wolves": "images/wolves.png"
-    };
+    "Arsenal": "images/arsenal.png",
+    "Aston Villa": "images/astonvilla.png",
+    "AFC Bournemouth": "images/bournemouth.png",
+    "Brentford": "images/brentford.png",
+    "Brighton": "images/brighton.png",
+    "Burnley": "images/burnley.png",
+    "Chelsea": "images/chelsea.png",
+    "Crystal Palace": "images/crystalpalace.png",
+    "Everton": "images/everton.png",
+    "Fulham": "images/fulham.png",
+    "Liverpool": "images/liverpool.png",
+    "Leeds United": "images/leedsunited.png",
+    "Manchester City": "images/mancity.png",
+    "Manchester United": "images/manutd.png",
+    "Newcastle United": "images/newcastle.png",
+    "Nottingham Forest": "images/forest.png",
+    "Sunderland" : "images/sunderland.png",
+    "Tottenham Hotspur": "images/spurs.png",
+    "West Ham United": "images/westham.png",
+    "Wolves": "images/wolves.png"
+};
 
-// Function to get team logo
 const getTeamLogo = (teamName) => {
     return images[teamName] || 'images/placeholder.png';
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Navigation
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('.section');
 
@@ -46,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector(`a[href="#${sectionId}"]`).classList.add('active');
     };
 
-    // Function to parse Esd timestamp
     const parseEsdDate = (esd) => {
         const esdStr = String(esd);
         if (esdStr.length !== 14) {
@@ -61,20 +57,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Date(year, month, day, hour, minute, second);
     };
 
-    // Function to format time as HH:MM
     const formatTime = (date) => {
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
         return `${hours}:${minutes}`;
     };
 
-    // Fixtures and Results Sections
     const fetchMatches = async () => {
         const url = 'https://livescore6.p.rapidapi.com/matches/v2/list-by-league?Category=soccer&Ccd=england&Scd=premier-league&Timezone=5.75';
         const options = {
             method: 'GET',
             headers: {
-                'x-rapidapi-key': '644c313eb1msh54941d04889366cp18e9f9jsn5ba62ab2afde',
+                'x-rapidapi-key': '9a93c5428amshb127fac77f6dd2cp1c84f6jsnca7748c58c60',
                 'x-rapidapi-host': 'livescore6.p.rapidapi.com'
             }
         };
@@ -92,105 +86,150 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             const matches = result.Stages?.[0]?.Events || [];
 
-            // Separate fixtures (not started) and results (finished)
+            // Sort all matches ascending to calculate matchweeks
+            const allMatches = [...matches].sort((a, b) => parseEsdDate(a.Esd) - parseEsdDate(b.Esd));
+
+            // Assign matchweek based on groups of 10 games
+            const matchToWeek = {};
+            allMatches.forEach((match, index) => {
+                const matchWeek = `Matchweek ${Math.floor(index / 10) + 1}`;
+                matchToWeek[match.Eid] = matchWeek; // Use unique event ID to map
+            });
+
+            // Separate fixtures and results
             const fixtures = matches.filter(match => match.Eps !== 'FT' && match.Eps !== 'HT');
             const results = matches.filter(match => match.Eps === 'FT' || match.Eps === 'HT');
 
-            // Sort by date
             fixtures.sort((a, b) => parseEsdDate(a.Esd) - parseEsdDate(b.Esd));
             results.sort((a, b) => parseEsdDate(b.Esd) - parseEsdDate(a.Esd));
 
-            // Fixtures: Group by date
-            const fixturesByDate = {};
+            // Function to get number from matchweek string
+            const getWeekNumber = (matchWeek) => {
+                const match = matchWeek.match(/\d+/);
+                return match ? parseInt(match[0]) : 0;
+            };
+
+            // Fixtures: Group by matchweek and date
+            const fixturesByWeek = {};
             fixtures.forEach(match => {
                 const date = parseEsdDate(match.Esd);
+                const matchWeek = matchToWeek[match.Eid];
                 const formattedDate = date.toLocaleDateString('en-GB', {
                     weekday: 'long',
                     day: 'numeric',
                     month: 'long',
                     year: 'numeric'
                 });
-                if (!fixturesByDate[formattedDate]) {
-                    fixturesByDate[formattedDate] = [];
+                if (!fixturesByWeek[matchWeek]) {
+                    fixturesByWeek[matchWeek] = {};
                 }
-                fixturesByDate[formattedDate].push(match);
+                if (!fixturesByWeek[matchWeek][formattedDate]) {
+                    fixturesByWeek[matchWeek][formattedDate] = [];
+                }
+                fixturesByWeek[matchWeek][formattedDate].push(match);
             });
 
             fixturesContainer.innerHTML = '';
-            for (const [date, dateMatches] of Object.entries(fixturesByDate)) {
-                const dateGroup = document.createElement('div');
-                dateGroup.className = 'date-group';
-                dateGroup.innerHTML = `<div class="date-header">${date}</div>`;
-                const matchesList = document.createElement('div');
-                dateMatches.forEach(match => {
-                    const team1Name = match.T1?.[0]?.Nm || 'Unknown';
-                    const team2Name = match.T2?.[0]?.Nm || 'Unknown';
-                    const team1Logo = getTeamLogo(team1Name);
-                    const team2Logo = getTeamLogo(team2Name);
-                    const matchTime = formatTime(parseEsdDate(match.Esd));
-                    const matchElement = document.createElement('div');
-                    matchElement.className = 'match-card';
-                    matchElement.innerHTML = `
-                        <div class="team T1">
-                            <span class="team-name">${team1Name}</span>
-                            <img src="${team1Logo}" alt="${team1Name} Logo">
-                        </div>
-                        <span class="time">${matchTime}</span>
-                        <div class="team right T2">
-                            <span class="team-name">${team2Name}</span>
-                            <img src="${team2Logo}" alt="${team2Name} Logo">
-                        </div>
-                    `;
-                    matchesList.appendChild(matchElement);
-                });
-                dateGroup.appendChild(matchesList);
-                fixturesContainer.appendChild(dateGroup);
+            const fixturesWeeks = Object.keys(fixturesByWeek).sort((a, b) => getWeekNumber(a) - getWeekNumber(b));
+            for (const matchWeek of fixturesWeeks) {
+                const weekGroup = document.createElement('div');
+                weekGroup.className = 'week-group';
+                weekGroup.innerHTML = `<div class="MW-header">${matchWeek}</div>`;
+                const mwGames = document.createElement('div');
+                mwGames.className = 'MW-games';
+                const dates = Object.keys(fixturesByWeek[matchWeek]).sort((a, b) => new Date(a) - new Date(b));
+                for (const date of dates) {
+                    const dateGroup = document.createElement('div');
+                    dateGroup.className = 'date-group';
+                    dateGroup.innerHTML = `<div class="date-header">${date}</div>`;
+                    const matchesList = document.createElement('div');
+                    fixturesByWeek[matchWeek][date].forEach(match => {
+                        const team1Name = match.T1?.[0]?.Nm || 'Unknown';
+                        const team2Name = match.T2?.[0]?.Nm || 'Unknown';
+                        const team1Logo = getTeamLogo(team1Name);
+                        const team2Logo = getTeamLogo(team2Name);
+                        const matchTime = formatTime(parseEsdDate(match.Esd));
+                        const matchElement = document.createElement('div');
+                        matchElement.className = 'match-card';
+                        matchElement.innerHTML = `
+                            <div class="team T1">
+                                <span class="team-name">${team1Name}</span>
+                                <img src="${team1Logo}" alt="${team1Name} Logo">
+                            </div>
+                            <span class="time">${matchTime}</span>
+                            <div class="team right T2">
+                                <span class="team-name">${team2Name}</span>
+                                <img src="${team2Logo}" alt="${team2Name} Logo">
+                            </div>
+                        `;
+                        matchesList.appendChild(matchElement);
+                    });
+                    dateGroup.appendChild(matchesList);
+                    mwGames.appendChild(dateGroup);
+                }
+                weekGroup.appendChild(mwGames);
+                fixturesContainer.appendChild(weekGroup);
             }
 
-            // Results: Group by date
-            const resultsByDate = {};
+            // Results: Group by matchweek and date
+            const resultsByWeek = {};
             results.forEach(match => {
                 const date = parseEsdDate(match.Esd);
+                const matchWeek = matchToWeek[match.Eid];
                 const formattedDate = date.toLocaleDateString('en-GB', {
                     weekday: 'long',
                     day: 'numeric',
                     month: 'long',
                     year: 'numeric'
                 });
-                if (!resultsByDate[formattedDate]) {
-                    resultsByDate[formattedDate] = [];
+                if (!resultsByWeek[matchWeek]) {
+                    resultsByWeek[matchWeek] = {};
                 }
-                resultsByDate[formattedDate].push(match);
+                if (!resultsByWeek[matchWeek][formattedDate]) {
+                    resultsByWeek[matchWeek][formattedDate] = [];
+                }
+                resultsByWeek[matchWeek][formattedDate].push(match);
             });
 
             resultsContainer.innerHTML = '';
-            for (const [date, dateMatches] of Object.entries(resultsByDate)) {
-                const dateGroup = document.createElement('div');
-                dateGroup.className = 'date-group';
-                dateGroup.innerHTML = `<div class="date-header">${date}</div>`;
-                const matchesList = document.createElement('div');
-                dateMatches.forEach(match => {
-                    const team1Name = match.T1?.[0]?.Nm || 'Unknown';
-                    const team2Name = match.T2?.[0]?.Nm || 'Unknown';
-                    const team1Logo = getTeamLogo(team1Name);
-                    const team2Logo = getTeamLogo(team2Name);
-                    const matchElement = document.createElement('div');
-                    matchElement.className = 'match-card';
-                    matchElement.innerHTML = `
-                        <div class="team T1">
-                            <span class="team-name">${team1Name}</span>
-                            <img src="${team1Logo}" alt="${team1Name} Logo">
-                        </div>
-                        <span class="score">${match.Tr1 || 0} - ${match.Tr2 || 0}</span>
-                        <div class="team right T2">
-                            <span class="team-name">${team2Name}</span>
-                            <img src="${team2Logo}" alt="${team2Name} Logo">
-                        </div>
-                    `;
-                    matchesList.appendChild(matchElement);
+            const resultsWeeks = Object.keys(resultsByWeek).sort((a, b) => getWeekNumber(b) - getWeekNumber(a));
+            for (const matchWeek of resultsWeeks) {
+                const weekGroup = document.createElement('div');
+                weekGroup.className = 'week-group';
+                weekGroup.innerHTML = `<div class="MW-header">${matchWeek}</div>`;
+                const mwGames = document.createElement('div');
+                mwGames.className = 'MW-games';
+                const dates = Object.keys(resultsByWeek[matchWeek]).sort((a, b) => new Date(b) - new Date(a));
+                for (const date of dates) {
+                    const dateGroup = document.createElement('div');
+                    dateGroup.className = 'date-group';
+                    dateGroup.innerHTML = `<div class="date-header">${date}</div>`;
+                    const matchesList = document.createElement('div');
+                    resultsByWeek[matchWeek][date].forEach(match => {
+                        const team1Name = match.T1?.[0]?.Nm || 'Unknown';
+                        const team2Name = match.T2?.[0]?.Nm || 'Unknown';
+                        const team1Logo = getTeamLogo(team1Name);
+                        const team2Logo = getTeamLogo(team2Name);
+                        const matchElement = document.createElement('div');
+                        matchElement.className = 'match-card';
+                        matchElement.innerHTML = `
+                            <div class="team T1">
+                                <span class="team-name">${team1Name}</span>
+                                <img src="${team1Logo}" alt="${team1Name} Logo">
+                            </div>
+                            <span class="score">${match.Tr1 || 0} - ${match.Tr2 || 0}</span>
+                            <div class="team right T2">
+                                <span class="team-name">${team2Name}</span>
+                                <img src="${team2Logo}" alt="${team2Name} Logo">
+                            </div>
+                        `;
+                        matchesList.appendChild(matchElement);
                 });
                 dateGroup.appendChild(matchesList);
-                resultsContainer.appendChild(dateGroup);
+                mwGames.appendChild(dateGroup);
+            }
+            weekGroup.appendChild(mwGames);
+            resultsContainer.appendChild(weekGroup);
             }
         } catch (error) {
             fixturesError.textContent = `Error: ${error.message}`;
@@ -200,13 +239,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Table Section
     const fetchTable = async () => {
         const url = 'https://livescore6.p.rapidapi.com/leagues/v2/get-table?Category=soccer&Ccd=england&Scd=premier-league';
         const options = {
             method: 'GET',
             headers: {
-                'x-rapidapi-key': '644c313eb1msh54941d04889366cp18e9f9jsn5ba62ab2afde',
+                'x-rapidapi-key': '9a93c5428amshb127fac77f6dd2cp1c84f6jsnca7748c58c60',
                 'x-rapidapi-host': 'livescore6.p.rapidapi.com'
             }
         };
@@ -226,14 +264,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 <table>
                     <thead>
                         <tr>
-                            <th>Position</th>
+                            <th class="posH">Position</th>
                             <th class="tdname">Club</th>
                             <th>GP</th>
                             <th>W</th>
                             <th>D</th>
                             <th>L</th>
                             <th>GD</th>
-                            <th>PTS</th>
+                            <th class="ptsH">PTS</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -242,16 +280,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             const position = index + 1;
                             if (position <= 5) {
                                 rowClass = 'top-6';
-                            } else if (position === 6) {
+                            } else if (position === 5) {
                                 rowClass = 'position-7';
-                            } else if (position === 7) {
+                            } else if (position === 6) {
                                 rowClass = 'position-8';
                             } else if (position >= teams.length - 2) {
                                 rowClass = 'bottom-3';
                             }
                             return `
                                 <tr class="${rowClass}">
-                                    <td>${position}</td>
+                                    <td class="position">${position}</td>
                                     <td class="tdname">
                                         <img src="${getTeamLogo(team.Tnm)}" alt="${team.Tnm} Logo">
                                         ${team.Tnm || 'Unknown'}
@@ -261,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <td>${team.drw || 0}</td>
                                     <td>${team.lst || 0}</td>
                                     <td>${team.gd || 0}</td>
-                                    <td>${team.ptsn || 0}</td>
+                                    <td class="points">${team.ptsn || 0}</td>
                                 </tr>
                             `;
                         }).join('')}
@@ -274,7 +312,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Initialize
     fetchMatches();
     fetchTable();
 });
